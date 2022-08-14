@@ -1,0 +1,39 @@
+rm(list=ls())
+
+# read more on: https://www.r-bloggers.com/2020/04/bayesian-linear-regression/
+
+install.packages("mlbench")
+install.packages("rstanarm")
+install.packages("bayesplot")
+install.packages("bayestestR")
+
+library(mlbench)
+library(tidyverse)
+library(rstanarm)
+library(bayesplot)
+library(bayestestR)
+
+data("BostonHousing")
+str(BostonHousing)
+bost <- BostonHousing[,c("medv","age","dis","chas")]
+summary(bost)
+
+model_freq<-lm(medv~., data=bost)
+summary(model_freq)
+
+model_bayes<-stan_glm(medv~., data=bost, seed=111)
+
+print(model_bayes, digits=3)
+
+model_bayes
+
+mcmc_dens(model_bayes, pars=c("age"))+
+  vline_at(-0.143, col="red")
+mcmc_dens(model_bayes, pars=c("chas1"))+
+  vline_at(7.496, col="red")
+mcmc_dens(model_bayes, pars=c("dis"))+
+  vline_at(-0.244, col="red")
+
+describe_posterior(model_bayes)
+hdi(model_bayes)
+eti(model_bayes)
